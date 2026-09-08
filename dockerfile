@@ -10,4 +10,5 @@ COPY . .
 
 ENV HEADLESS=true
 
-CMD ["behave", "tests/features"]
+ENTRYPOINT ["behave"]
+CMD ["tests/features"]

@@ -1,12 +1,13 @@
-Feature: Patient login
+Feature: Customer login
 
-  As a patient,
-  I want to successfully log in to the MedAppoint platform
-  So that I can access my appointments
+  As a customer,
+  I want to successfully log in to the Saucedemo platform
+  So that I can access my account
 
-  Scenario: Patient successfully logs in to MedAppoint
-    Given The patient is at the login page
-    When The patient fills in his email and password
-    And The patient clicks on the Sign In button
-    Then The patient can see the dashboard page
+  @smoke @regression
+  Scenario: Customer successfully logs in to Saucedemo
+    Given The customer is at the login page
+    When The customer fills in his email and password
+    And The customer clicks on the Log In button
+    Then The customer can see the products page
     

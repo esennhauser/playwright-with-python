@@ -4,20 +4,25 @@ from playwright.sync_api import expect
 
 class LoginPage(BasePage):
 
-    EMAIL_INPUT = "#email"
-    PASSWORD_INPUT = "#password"
+    USERNAME_INPUT = '[data-test="username"]'
+    PASSWORD_INPUT = '[data-test="password"]'
+    LOGIN_BUTTON = '[data-test="login-button"]'
+    ERROR_MESSAGE = ".error-message-container"
 
-    def fill_credentials(self, email, password):
-        self.page.locator(self.EMAIL_INPUT).fill(email)
+    def fill_credentials(self, username, password):
+        self.page.locator(self.USERNAME_INPUT).fill(username)
         self.page.locator(self.PASSWORD_INPUT).fill(password)
 
-    def click_sign_in(self):
-        self.page.get_by_role("button", name="Sign In").click()
+    def click_login(self):
+        self.page.locator(self.LOGIN_BUTTON).click()
+
+    def login(self, username, password):
+        self.fill_credentials(username, password)
+        self.click_login()
 
     def verify_dashboard(self):
-        dashboard_link = self.page.get_by_role(
-            "link",
-            name="Dashboard",
-            exact=True
-        )
-        expect(dashboard_link).to_be_visible()
+        products_title = self.page.locator('[data-test="title"]')
+        expect(products_title).to_be_visible()
+
+    def verify_login_error(self, message):
+        expect(self.page.locator(self.ERROR_MESSAGE)).to_contain_text(message)

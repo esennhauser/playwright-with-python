@@ -1,0 +1,90 @@
+name: Automated Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t qa-automation .
+
+      - name: Run automated tests
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            docker run --name qa-tests \
+              -e EMAIL="${{ secrets.EMAIL }}" \
+              -e PASSWORD="${{ secrets.PASSWORD }}" \
+              -e URL="${{ secrets.URL }}" \
+              qa-automation \
+              --tags=smoke tests/features
+          else
+            docker run --name qa-tests \
+              -e EMAIL="${{ secrets.EMAIL }}" \
+              -e PASSWORD="${{ secrets.PASSWORD }}" \
+              -e URL="${{ secrets.URL }}" \
+              qa-automation \
+              tests/features
+          fi
+
+      - name: Copy Allure results
+        if: always()
+        run: |
+          docker cp qa-tests:/app/allure-results ./allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Install Allure
+        if: always()
+        run: |
+          npm install -g allure-commandline
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          allure generate allure-results \
+            --clean \
+            -o allure-report
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: allure-report
+
+  deploy:
+    needs: tests
+    if: always() && needs.tests.result == 'success'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        

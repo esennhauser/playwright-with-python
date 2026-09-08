@@ -4,30 +4,13 @@
 
 The automation covers the following scenarios:
 
-### 1. Patient Login
+### 1. Customer Login
 
-Validates that a patient can successfully authenticate and access the dashboard.
+Validates that a customer can successfully authenticate and access the products page.
 
-### 2. Book Appointment
+### 2. Add a product
 
-Validates that a patient can access the appointment booking form and that all required UI components are displayed. The appointment is **not submitted**, avoiding unnecessary test data creation in the environment.
-
-### 3. Reschedule Appointment
-
-Validates that a patient can:
-
-1. Access the appointments page.
-2. Select an existing appointment.
-3. Open the reschedule form.
-4. Select a different date.
-5. Select a different available time.
-6. Confirm the reschedule.
-7. Receive the success message.
-8. See the updated appointment in the UI.
-
-The last assertion currently fails because the application does not refresh/update the appointment card after a successful reschedule.
-
-This is an **application defect intentionally detected by the automated test**.
+Validates that a customer can add a product to the cart and verifies is present.
 
 ---
 
@@ -138,9 +121,9 @@ playwright install
 Create a `.env` file or use `.env.example` in the project root:
 
 ```env
-MEDAPPOINT_EMAIL=your_email
-MEDAPPOINT_PASSWORD=your_password
-MEDAPPOINT_URL=https://light-it-qa-challenge.vercel.app
+EMAIL=your_email
+PASSWORD=your_password
+URL=https://www.saucedemo.com/
 ```
 
 Credentials are loaded using `python-dotenv`.
@@ -163,6 +146,12 @@ Run a specific feature:
 
 ```bash
 behave tests/features/login.feature
+```
+
+Run a specific test suite:
+
+```bash
+behave tests/features --tags=smoke
 ```
 
 ---
@@ -190,6 +179,12 @@ allure open allure-report
 
 The report contains screenshots associated with each executed step, which makes UI failures easier to investigate.
 
+
+Latest Allure Report:
+
+https://esennhauser.github.io/playwright-with-python/
+
+
 ---
 
 # Docker
@@ -199,7 +194,7 @@ The project can also be executed inside Docker to provide a consistent test envi
 Build image:
 
 ```bash
-docker build -t medappoint-tests .
+docker build -t saucedemo-tests .
 ```
 
 Run tests and persist Allure results locally:
@@ -208,7 +203,7 @@ Run tests and persist Allure results locally:
 docker run --rm \
   --env-file .env \
   -v "$(pwd)/allure-results:/app/allure-results" \
-  medappoint-tests
+  saucedemo-tests
 ```
 
 Generate Allure report
@@ -226,49 +221,4 @@ allure open allure-report
 The Docker image contains the Python dependencies and Playwright browser required to execute the test suite.
 
 ---
-
-# Test Results
-
-Current automated coverage:
-
-| Feature          | Scenario                                        | Result |
-| ---------------- | ----------------------------------------------- | ------ |
-| Login            | Patient successfully logs in                    | PASS   |
-| Book Appointment | Patient can access booking form                 | PASS   |
-| Reschedule       | Patient successfully reschedules an appointment | FAIL   |
-
-### Known failing test
-
-The reschedule scenario intentionally fails on the final assertion.
-
-After confirming a reschedule:
-
-```text
-Confirm
-   ↓
-Success message
-   ↓
-Appointment card
-```
-
-The application displays the success message, but the appointment card continues displaying the previous date/time.
-
-Refreshing the page causes the updated appointment to appear.
-
-The test therefore correctly identifies the UI synchronization/update defect instead of hiding it by performing a browser refresh.
-
----
-
-# Future Improvements
-
-Potential improvements for a production-grade framework include:
-
-* API-level setup and teardown for deterministic test data.
-* Better test data management.
-* Additional negative and validation scenarios.
-* Cross-browser execution.
-* Parallel execution.
-* CI/CD integration.
-* Automatic publishing of Allure reports.
-* API/database validation for backend consistency.
-* Dedicated test IDs in the application for critical UI elements.
+Live demo
